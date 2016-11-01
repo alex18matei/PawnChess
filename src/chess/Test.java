@@ -77,6 +77,9 @@ public class Test {
         Chessboard chessboard = new Chessboard();
         System.out.println(chessboard.toString(initialState));
 
+        chessboard.setWasInitialMove(true);
+        chessboard.setEnPassantI(2);
+        chessboard.setEnPassantJ(1);
         if (!chessboard.isComputerTurn()) {
             System.out.println("Player 1 (White)");
         } else {

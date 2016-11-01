@@ -10,6 +10,30 @@ public class Chessboard {
     private int enPassantI, enPassantJ;
     private boolean wasInitialMove = false;
 
+    public int getEnPassantI() {
+        return enPassantI;
+    }
+
+    public void setEnPassantI(int enPassantI) {
+        this.enPassantI = enPassantI;
+    }
+
+    public int getEnPassantJ() {
+        return enPassantJ;
+    }
+
+    public void setEnPassantJ(int enPassantJ) {
+        this.enPassantJ = enPassantJ;
+    }
+
+    public boolean isWasInitialMove() {
+        return wasInitialMove;
+    }
+
+    public void setWasInitialMove(boolean wasInitialMove) {
+        this.wasInitialMove = wasInitialMove;
+    }
+
     public char[][] init() {
         state = new char[8][8];
         for (int i = 0; i < 8; ++i) {
@@ -223,10 +247,12 @@ public class Chessboard {
         if (!wasInitialMove)
             return false;
         if (!isComputerTurn) {
-            if (currentState[currentI][currentJ] != 'W')
+            if (currentState[currentI][currentJ] != 'W' || (currentState[enPassantI+1][enPassantJ-1]!='W' &&
+                    currentState[enPassantI+1][enPassantJ+1]!='W'))
                 return false;
         } else {
-            if (currentState[currentI][currentJ] != 'B')
+            if (currentState[currentI][currentJ] != 'B' || (currentState[enPassantI-1][enPassantJ+1]!='B' &&
+                    currentState[enPassantI-1][enPassantJ-1]!='B'))
                 return false;
         }
         return true;
