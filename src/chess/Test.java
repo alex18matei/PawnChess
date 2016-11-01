@@ -1,7 +1,9 @@
 package chess;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Roxana on 11/1/2016.
@@ -41,7 +43,7 @@ public class Test {
         try {
             String line = null;
             int i = 0, j = 0;
-            BufferedReader reader = new BufferedReader(new FileReader("C:/Users/Roxana/Documents/GitHub/PawnChess/input.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
             while ((line = reader.readLine()) != null) {
                 if (i >= 1 && i <= 8) {
                     state[j++] = toChar(line);
@@ -58,7 +60,7 @@ public class Test {
     public void writeState(String currentState) {
         try {
 
-            FileWriter fw = new FileWriter("C:/Users/Roxana/Documents/GitHub/PawnChess/input.txt");
+            FileWriter fw = new FileWriter("input.txt");
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(currentState);
             bw.close();
@@ -79,7 +81,7 @@ public class Test {
 
         chessboard.setWasInitialMove(true);
         chessboard.setEnPassantI(2);
-        chessboard.setEnPassantJ(1);
+        chessboard.setEnPassantJ(2);
         if (!chessboard.isComputerTurn()) {
             System.out.println("Player 1 (White)");
         } else {
@@ -92,7 +94,19 @@ public class Test {
                 System.out.println("Mutarea nu este valida. Introdu din nou");
             }
         } while (currentState == initialState);
-        this.writeState(chessboard.toString(currentState));
         System.out.println(chessboard.toString(currentState));
+        //this.writeState(chessboard.toString(currentState));
+
+        /*chessboard.setWasInitialMove(true);
+        chessboard.setEnPassantI(2);
+        chessboard.setEnPassantJ(2);*/
+        //Pawn pawn = new Pawn(3,3);
+        //List<char[][]> posibleStates = chessboard.getAllPosibleMoves(currentState);
+        /*for( char[][] state : posibleStates){
+            System.out.println(chessboard.toString(state));
+        }*/
+
+        char[][] bestState = chessboard.minimax(currentState);
+        System.out.println("Best :\n" + chessboard.toString(bestState));
     }
 }

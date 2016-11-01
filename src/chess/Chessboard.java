@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Chessboard {
@@ -145,14 +147,13 @@ public class Chessboard {
         if (!isComputerTurn) {
             initialTrasition[6][currentJ] = '_';
             initialTrasition[4][currentJ] = 'W';
-            enPassantI = 5;
+            //enPassantI = 5;
         } else {
             initialTrasition[1][currentJ] = '_';
             initialTrasition[3][currentJ] = 'B';
-            enPassantI = 2;
+            //enPassantI = 2;
         }
-        enPassantJ = currentJ;
-        wasInitialMove = true;
+        //enPassantJ = currentJ;
         return initialTrasition;
     }
 
@@ -166,7 +167,6 @@ public class Chessboard {
             initialTrasition[currentI][currentJ] = '_';
             initialTrasition[currentI + 1][currentJ] = 'B';
         }
-        wasInitialMove = false;
         return initialTrasition;
     }
 
@@ -180,7 +180,6 @@ public class Chessboard {
             initialTrasition[currentI][currentJ] = '_';
             initialTrasition[currentI + 1][targetJ] = 'B';
         }
-        wasInitialMove = false;
         return initialTrasition;
     }
 
@@ -216,7 +215,7 @@ public class Chessboard {
 
     public boolean validateNormal(char[][] currentState, int currentI, int currentJ) {
 
-        if (isOutOfMatrix(currentI, currentJ))
+        if (isOutOfMatrix(currentI, currentJ) || isOutOfMatrix(currentI - 1) || isOutOfMatrix(currentI + 1))
             return false;
         if (!isComputerTurn) {
             if (!isFree(currentState, currentI - 1, currentJ) || currentState[currentI][currentJ] != 'W')
@@ -229,7 +228,8 @@ public class Chessboard {
     }
 
     public boolean validateCapture(char[][] currentState, int currentI, int currentJ, int targetJ) {
-        if (isOutOfMatrix(currentI, currentJ) || isOutOfMatrix(targetJ))
+        if (isOutOfMatrix(currentI, currentJ) || isOutOfMatrix(targetJ)
+                || isOutOfMatrix(currentI - 1) || isOutOfMatrix(currentI + 1))
             return false;
         if (!isComputerTurn) {
             if (currentState[currentI - 1][targetJ] != 'B' || currentState[currentI][currentJ] != 'W')
@@ -242,18 +242,57 @@ public class Chessboard {
     }
 
     public boolean validateEnPassant(char[][] currentState, int currentI, int currentJ) {
-        if (isOutOfMatrix(currentI, currentJ))
+        if (isOutOfMatrix(currentI, currentJ)) {
+            System.out.println("out of matrix");
             return false;
-        if (!wasInitialMove)
+        }
+        if (!wasInitialMove) {
+            System.out.println("wasInitialMove");
             return false;
+        }
         if (!isComputerTurn) {
-            if (currentState[currentI][currentJ] != 'W' || (currentState[enPassantI+1][enPassantJ-1]!='W' &&
-                    currentState[enPassantI+1][enPassantJ+1]!='W'))
+            if (currentI != enPassantI + 1 && (currentJ != enPassantJ - 1 || currentJ != enPassantJ + 1)) {
                 return false;
+            }
+            if (currentJ == 0) {
+                if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI + 1][enPassantJ + 1] != 'W') {
+                    System.out.println("first");
+                    return false;
+                }
+            } else if ((currentJ == 7)) {
+                if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI + 1][enPassantJ - 1] != 'W') {
+                    System.out.println("first");
+                    return false;
+                }
+            } else {
+                System.out.println("enPassantI " + enPassantI + "enPassantJ " + enPassantJ);
+                if (currentState[currentI][currentJ] != 'W' || (currentState[enPassantI + 1][enPassantJ - 1] != 'W' &&
+                        currentState[enPassantI + 1][enPassantJ + 1] != 'W')) {
+                    System.out.println("first");
+                    return false;
+                }
+            }
         } else {
-            if (currentState[currentI][currentJ] != 'B' || (currentState[enPassantI-1][enPassantJ+1]!='B' &&
-                    currentState[enPassantI-1][enPassantJ-1]!='B'))
+            if (currentI != enPassantI - 1 && (currentJ != enPassantJ - 1 || currentJ != enPassantJ + 1)) {
                 return false;
+            }
+            if (currentJ == 0) {
+                if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI - 1][enPassantJ + 1] != 'W') {
+                    System.out.println("first");
+                    return false;
+                }
+            } else if ((currentJ == 7)) {
+                if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI - 1][enPassantJ - 1] != 'W') {
+                    System.out.println("first");
+                    return false;
+                }
+            } else {
+                if (currentState[currentI][currentJ] != 'B' || (currentState[enPassantI - 1][enPassantJ + 1] != 'B' &&
+                        currentState[enPassantI - 1][enPassantJ - 1] != 'B')) {
+                    System.out.println("2nd");
+                    return false;
+                }
+            }
         }
         return true;
     }
@@ -318,11 +357,23 @@ public class Chessboard {
         int move = getMove(scan);
         //scan.close();
         if (move == 1) { //initialMove
-            if (validateInitial(initialState, linie, coloana))
-                return initialTransition(initialState, coloana);
+            if (validateInitial(initialState, linie, coloana)) {
+
+                char[][] tempState = initialTransition(initialState, coloana);
+                wasInitialMove = true;
+                if (!isComputerTurn) {
+                    enPassantI = 5;
+                } else {
+                    enPassantI = 2;
+                }
+                enPassantJ = coloana;
+                return tempState;
+            }
         } else if (move == 2) {
-            if (validateNormal(initialState, linie, coloana))
+            if (validateNormal(initialState, linie, coloana)) {
+                wasInitialMove = false;
                 return normalTransition(initialState, linie, coloana);
+            }
         } else if (move == 3) {
             System.out.println("Introdu 0-stanga sau 1-dreapta:");
             scan = new Scanner(System.in);
@@ -334,13 +385,152 @@ public class Chessboard {
             else if (leftOrRight == 1) {
                 targetJ = coloana + 1;
             }
-            if (validateCapture(initialState, linie, coloana, targetJ))
+            if (validateCapture(initialState, linie, coloana, targetJ)) {
+                wasInitialMove = false;
                 return captureTransition(initialState, linie, coloana, targetJ);
+            }
         } else if (move == 4) {
-            if (validateEnPassant(initialState, linie, coloana))
+            if (validateEnPassant(initialState, linie, coloana)) {
+                wasInitialMove = false;
                 return enPassantTransition(initialState, linie, coloana);
+            }
         }
 
         return initialState;
+    }
+
+    public List<char[][]> getAllPosibleMoves(char[][] currentState, char player) {
+
+        List<char[][]> posibleStates = new ArrayList<>();
+        List<Pawn> pawns = getPawnList(currentState, player);
+        for (Pawn pawn : pawns) {
+            posibleStates.addAll(getAllMovesForPawn(currentState, pawn));
+        }
+        return posibleStates;
+    }
+
+    public List<char[][]> getAllMovesForPawn(char[][] currentState, Pawn pawn) {
+        List<char[][]> posibleStates = new ArrayList<>();
+
+        System.out.println("Pawn[ " + pawn.getLine() + " ][ " + pawn.getCol() + " ]");
+        if (validateEnPassant(currentState, pawn.getLine(), pawn.getCol())) {
+            posibleStates.add(enPassantTransition(currentState, pawn.getLine(), pawn.getCol()));
+        }
+        if (validateInitial(currentState, pawn.getLine(), pawn.getCol()))
+            posibleStates.add(initialTransition(currentState, pawn.getCol()));
+        if (validateNormal(currentState, pawn.getLine(), pawn.getCol()))
+            posibleStates.add(normalTransition(currentState, pawn.getLine(), pawn.getCol()));
+        if (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() + 1))
+            posibleStates.add(captureTransition(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() + 1));
+        if (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1))
+            posibleStates.add(captureTransition(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1));
+
+        for (char[][] state : posibleStates) {
+            System.out.println(toString(state));
+        }
+        return posibleStates;
+    }
+
+    public float min_play(char[][] currentState, int depth) {
+        if (isFinal(currentState)|| depth == 0) {
+            return evaluate(currentState);
+        }
+        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
+        float best_score = Float.POSITIVE_INFINITY;
+        for (char[][] move : moves) {
+            char[][] clone = copy(move);
+            float score = max_play(clone, depth - 1);
+            if (score < best_score) {
+                //best_move = move
+                best_score = score;
+            }
+        }
+        return best_score;
+    }
+
+    private float max_play(char[][] currentState, int depth) {
+        if (isFinal(currentState) || depth == 0) {
+            return evaluate(currentState);
+        }
+        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
+        float best_score = Float.NEGATIVE_INFINITY;
+        for (char[][] move : moves) {
+            char[][] clone = copy(move);
+            float score = min_play(clone, depth - 1);
+            if (score > best_score) {
+                //best_move = move
+                best_score = score;
+            }
+        }
+        return best_score;
+    }
+
+    private float evaluate(char[][] currentState) {
+        float hashScore = stateIsFinal(currentState);
+        float pawnScore = scoreOfPawns(currentState, 'W') - scoreOfPawns(currentState, 'B');
+        float mobility = getAllPosibleMoves(currentState, 'W').size() - getAllPosibleMoves(currentState, 'B').size();
+        float movesNo = movesNo(currentState, 'B') - movesNo(currentState, 'W');
+        return pawnScore + 0.1f * mobility + movesNo + hashScore;
+        //- 0.5 * blockedPieces(currentState);
+    }
+
+    private float stateIsFinal(char[][] currentState) {
+        if( isFinal(currentState)){
+            return Float.POSITIVE_INFINITY;
+        }
+        return 0;
+    }
+    /*private float evaluate(char[][] currentState, char player) {
+        return getAllPosibleMoves(currentState).size() + scoreOfPawns(currentState, player);
+        //- 0.5 * blockedPieces(currentState);
+    }*/
+
+    private int scoreOfPawns(char[][] currentState, char player) {
+        List<Pawn> pawns = getPawnList(currentState, player);
+        return pawns.size();
+    }
+
+    private float movesNo(char[][] currentState, char player){
+        float score = 0;
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if (currentState[i][j] == player) {
+                    if( player == 'W'){
+                        score += i;
+                    } else {
+                        score += (7 - i);
+                    }
+                }
+            }
+        }
+        return score;
+    }
+
+    private List<Pawn> getPawnList(char[][] currentState, char player) {
+        List<Pawn> pawns = new ArrayList<>();
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                if (currentState[i][j] == player) {
+                    Pawn pawn = new Pawn(i, j);
+                    pawns.add(pawn);
+                }
+            }
+        }
+        return pawns;
+    }
+
+    public char[][] minimax(char[][] currentState) {
+        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
+        char[][] bestMove = moves.get(0);
+        float best_score = Float.NEGATIVE_INFINITY;
+        for (char[][] move : moves) {
+            char[][] clone = copy(move);
+            float score = min_play(clone, 0);
+            if (score > best_score) {
+                bestMove = copy(move);
+                best_score = score;
+            }
+        }
+        return bestMove;
     }
 }
