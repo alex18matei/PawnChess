@@ -150,23 +150,25 @@ public class Chessboard {
         if (!isComputerTurn) {
             initialTrasition[currentI][currentJ] = '_';
             initialTrasition[enPassantI][enPassantJ] = 'W';
-            initialTrasition[enPassantI - 1][enPassantJ] = '_';
+            initialTrasition[enPassantI + 1][enPassantJ] = '_';
         } else {
             initialTrasition[currentI][currentJ] = '_';
             initialTrasition[enPassantI][enPassantJ] = 'B';
-            initialTrasition[enPassantI + 1][enPassantJ] = '_';
+            initialTrasition[enPassantI - 1][enPassantJ] = '_';
         }
         return initialTrasition;
     }
 
-    public boolean validateInitial(char[][] currentState, int currentJ) {
+    public boolean validateInitial(char[][] currentState, int currentI, int currentJ) {
         if (isOutOfMatrix(currentJ))
             return false;
         if (!isComputerTurn) {
-            if (!isFree(currentState, 4, currentJ) || currentState[6][currentJ] != 'W')
+            if (!isFree(currentState, 4, currentJ) || !isFree(currentState, 5, currentJ)
+                    || currentState[currentI][currentJ] != 'W' || currentI != 6)
                 return false;
         } else {
-            if (!isFree(currentState, 3, currentJ) || currentState[1][currentJ] != 'B')
+            if (!isFree(currentState, 3, currentJ) || !isFree(currentState, 2, currentJ)
+                    || currentState[currentI][currentJ] != 'B' || currentI != 1)
                 return false;
         }
         return true;
@@ -217,8 +219,27 @@ public class Chessboard {
     public void run() {
         char[][] initialState = init();
         System.out.println(this.toString(initialState));
-        char[][] currentState = getPlayerMove(initialState);
-        System.out.println(this.toString(currentState));
+        char[][] currentState;// = getPlayerMove(initialState);
+
+
+        while (!isFinal(initialState)) {
+            if (!isComputerTurn) {
+                System.out.println("Player 1 (White)");
+            } else {
+                System.out.println("Player 2 (Black)");
+            }
+            do {
+                currentState = getPlayerMove(initialState);
+                if (currentState == initialState) {
+                    System.out.println("Mutarea nu este valida. Introdu din nou");
+                }
+            } while (currentState == initialState);
+            initialState = currentState;
+            isComputerTurn = !isComputerTurn;
+            System.out.println(this.toString(currentState));
+        }
+
+        System.out.println("Done");
 
     }
 
@@ -236,28 +257,35 @@ public class Chessboard {
             System.out.println("3 - Capture Transition");
             System.out.println("4 - EnPassant Transition");
             move = scan.nextInt();
-        } while (validateMove(move));
+            if (!validateMove(move)) {
+                System.out.println("Mutarea nu este valida. Introdu din nou");
+            }
+        } while (!validateMove(move));
         return move;
     }
 
     private char[][] getPlayerMove(char[][] initialState) {
         Scanner scan = new Scanner(System.in);
-        System.out.println("Introduce coordonatele pionului:");
+        System.out.println("Introdu coordonatele pionului:");
         System.out.println("Linie:");
         int linie = scan.nextInt();
         System.out.println("Coloana:");
         int coloana = scan.nextInt();
 
+
         int move = getMove(scan);
+        //scan.close();
         if (move == 1) { //initialMove
-            if (validateInitial(initialState, coloana))
+            if (validateInitial(initialState, linie, coloana))
                 return initialTransition(initialState, coloana);
         } else if (move == 2) {
             if (validateNormal(initialState, linie, coloana))
                 return normalTransition(initialState, linie, coloana);
         } else if (move == 3) {
             System.out.println("Introdu 0-stanga sau 1-dreapta:");
+            scan = new Scanner(System.in);
             int leftOrRight = scan.nextInt();
+            //scan.close();
             int targetJ = -1;
             if (leftOrRight == 0)
                 targetJ = coloana - 1;
@@ -270,8 +298,6 @@ public class Chessboard {
             if (validateEnPassant(initialState, linie, coloana))
                 return enPassantTransition(initialState, linie, coloana);
         }
-
-        scan.close();
 
         return initialState;
     }
