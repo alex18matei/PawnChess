@@ -59,6 +59,22 @@ public class Chessboard {
         return sb.toString();
     }
 
+    public char[][] getState() {
+        return state;
+    }
+
+    public void setState(char[][] state) {
+        this.state = copy(state);
+    }
+
+    public boolean isComputerTurn() {
+        return isComputerTurn;
+    }
+
+    public void setComputerTurn(boolean computerTurn) {
+        isComputerTurn = computerTurn;
+    }
+
     public boolean isFinal(char[][] state) {
         for (int j = 0; j < 8; ++j) {
             if (state[0][j] == 'W') {
@@ -264,7 +280,7 @@ public class Chessboard {
         return move;
     }
 
-    private char[][] getPlayerMove(char[][] initialState) {
+    public char[][] getPlayerMove(char[][] initialState) {
         Scanner scan = new Scanner(System.in);
         System.out.println("Introdu coordonatele pionului:");
         System.out.println("Linie:");
