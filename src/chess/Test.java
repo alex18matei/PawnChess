@@ -106,7 +106,7 @@ public class Test {
             System.out.println(chessboard.toString(state));
         }*/
         chessboard.setComputerTurn(true);
-        char[][] bestState = chessboard.minimax(currentState, 'B', 1);
+        char[][] bestState = chessboard.minimax(currentState, 'B', 2);
         System.out.println("Best : " + chessboard.evaluate(currentState, 'B') + "\n" + chessboard.toString(bestState));
     }
 }

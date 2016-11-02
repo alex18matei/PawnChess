@@ -242,7 +242,7 @@ public class Chessboard {
     }
 
     public boolean validateEnPassant(char[][] currentState, int currentI, int currentJ) {
-        if (isOutOfMatrix(currentI, currentJ)) {
+        if (isOutOfMatrix(currentI, currentJ) || isOutOfMatrix(enPassantJ - 1) || isOutOfMatrix(enPassantJ + 1)) {
             return false;
         }
         if (!wasInitialMove) {
@@ -332,7 +332,7 @@ public class Chessboard {
                 } while (currentState == initialState);
             } else {
                 System.out.println("Computer (Black)");
-                currentState = minimax(initialState, 'B', 5);
+                currentState = minimax(initialState, 'B', 0);
             }
             initialState = currentState;
             isComputerTurn = !isComputerTurn;
@@ -459,9 +459,9 @@ public class Chessboard {
             oponent = 'W';
         }
         float captureScore = captureScore(currentState, player);
-        float pawnScore = scoreOfPawns(currentState, player) - scoreOfPawns(currentState, oponent);
-        float mobility = getAllPosibleMoves(currentState, player).size() - getAllPosibleMoves(currentState, oponent).size();
-        float movesNo = movesNo(currentState, oponent) - movesNo(currentState, player);
+        float pawnScore = scoreOfPawns(currentState, player);// - scoreOfPawns(currentState, oponent);
+        float mobility = getAllPosibleMoves(currentState, player).size();// - getAllPosibleMoves(currentState, oponent).size();
+        float movesNo = movesNo(currentState, oponent);// - movesNo(currentState, player);
         return pawnScore + 0.1f * mobility + 0.2f*movesNo + hashScore + captureScore;
     }
 
@@ -563,7 +563,7 @@ public class Chessboard {
             char[][] clone = copy(move);
             float score = min_play(clone, depth, player);
             if (score > best_score) {
-                bestMove = copy(move);
+                bestMove = copy(clone);
                 best_score = score;
             }
         }
