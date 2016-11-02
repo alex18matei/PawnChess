@@ -458,11 +458,11 @@ public class Chessboard {
         } else {
             oponent = 'W';
         }
-        float captureScore = captureScore(currentState, player);
-        float pawnScore = scoreOfPawns(currentState, player);// - scoreOfPawns(currentState, oponent);
-        float mobility = getAllPosibleMoves(currentState, player).size();// - getAllPosibleMoves(currentState, oponent).size();
-        float movesNo = movesNo(currentState, oponent);// - movesNo(currentState, player);
-        return pawnScore + 0.1f * mobility + 0.2f*movesNo + hashScore + captureScore;
+        float captureScore = captureScore(currentState, oponent) -  captureScore(currentState, player);
+        float pawnScore = scoreOfPawns(currentState, player) - scoreOfPawns(currentState, oponent);
+        float mobility = getAllPosibleMoves(currentState, player).size() - getAllPosibleMoves(currentState, oponent).size();
+        float movesNo = movesNo(currentState, oponent) - movesNo(currentState, player);
+        return pawnScore + 0.1f * mobility - 0.2f*movesNo + hashScore + captureScore;
     }
 
     private float captureScore(char[][] currentState, char player) {
@@ -566,6 +566,8 @@ public class Chessboard {
                 bestMove = copy(clone);
                 best_score = score;
             }
+            System.out.println(evaluate(move, player));
+            System.out.println(toString(move));
         }
         //System.out.println(best_score);
         //System.out.println(toString(bestMove));
