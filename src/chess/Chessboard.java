@@ -243,11 +243,9 @@ public class Chessboard {
 
     public boolean validateEnPassant(char[][] currentState, int currentI, int currentJ) {
         if (isOutOfMatrix(currentI, currentJ)) {
-            System.out.println("out of matrix");
             return false;
         }
         if (!wasInitialMove) {
-            System.out.println("wasInitialMove");
             return false;
         }
         if (!isComputerTurn) {
@@ -256,19 +254,16 @@ public class Chessboard {
             }
             if (currentJ == 0) {
                 if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI + 1][enPassantJ + 1] != 'W') {
-                    System.out.println("first");
                     return false;
                 }
             } else if ((currentJ == 7)) {
                 if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI + 1][enPassantJ - 1] != 'W') {
-                    System.out.println("first");
                     return false;
                 }
             } else {
-                System.out.println("enPassantI " + enPassantI + "enPassantJ " + enPassantJ);
+                //System.out.println("enPassantI " + enPassantI + "enPassantJ " + enPassantJ);
                 if (currentState[currentI][currentJ] != 'W' || (currentState[enPassantI + 1][enPassantJ - 1] != 'W' &&
                         currentState[enPassantI + 1][enPassantJ + 1] != 'W')) {
-                    System.out.println("first");
                     return false;
                 }
             }
@@ -278,18 +273,15 @@ public class Chessboard {
             }
             if (currentJ == 0) {
                 if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI - 1][enPassantJ + 1] != 'W') {
-                    System.out.println("first");
                     return false;
                 }
             } else if ((currentJ == 7)) {
                 if (currentState[currentI][currentJ] != 'W' || currentState[enPassantI - 1][enPassantJ - 1] != 'W') {
-                    System.out.println("first");
                     return false;
                 }
             } else {
                 if (currentState[currentI][currentJ] != 'B' || (currentState[enPassantI - 1][enPassantJ + 1] != 'B' &&
                         currentState[enPassantI - 1][enPassantJ - 1] != 'B')) {
-                    System.out.println("2nd");
                     return false;
                 }
             }
@@ -297,7 +289,7 @@ public class Chessboard {
         return true;
     }
 
-    public void run() {
+    public void run2Players() {
         char[][] initialState = init();
         System.out.println(this.toString(initialState));
         char[][] currentState;// = getPlayerMove(initialState);
@@ -315,6 +307,33 @@ public class Chessboard {
                     System.out.println("Mutarea nu este valida. Introdu din nou");
                 }
             } while (currentState == initialState);
+            initialState = currentState;
+            isComputerTurn = !isComputerTurn;
+            System.out.println(this.toString(currentState));
+        }
+
+        System.out.println("Done");
+
+    }
+
+    public void run() {
+        char[][] initialState = init();
+        System.out.println(this.toString(initialState));
+        char[][] currentState = copy(initialState);// = getPlayerMove(initialState);
+
+        while (!isFinal(initialState)) {
+            if (!isComputerTurn) {
+                System.out.println("Player 1 (White)");
+                do {
+                    currentState = getPlayerMove(initialState);
+                    if (currentState == initialState) {
+                        System.out.println("Mutarea nu este valida. Introdu din nou");
+                    }
+                } while (currentState == initialState);
+            } else {
+                System.out.println("Computer (Black)");
+                currentState = minimax(initialState, 'B', 5);
+            }
             initialState = currentState;
             isComputerTurn = !isComputerTurn;
             System.out.println(this.toString(currentState));
@@ -412,7 +431,7 @@ public class Chessboard {
     public List<char[][]> getAllMovesForPawn(char[][] currentState, Pawn pawn) {
         List<char[][]> posibleStates = new ArrayList<>();
 
-        System.out.println("Pawn[ " + pawn.getLine() + " ][ " + pawn.getCol() + " ]");
+        //System.out.println("Pawn[ " + pawn.getLine() + " ][ " + pawn.getCol() + " ]");
         if (validateEnPassant(currentState, pawn.getLine(), pawn.getCol())) {
             posibleStates.add(enPassantTransition(currentState, pawn.getLine(), pawn.getCol()));
         }
@@ -425,53 +444,36 @@ public class Chessboard {
         if (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1))
             posibleStates.add(captureTransition(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1));
 
-        for (char[][] state : posibleStates) {
+        /*for (char[][] state : posibleStates) {
             System.out.println(toString(state));
-        }
+        }*/
         return posibleStates;
     }
 
-    public float min_play(char[][] currentState, int depth) {
-        if (isFinal(currentState)|| depth == 0) {
-            return evaluate(currentState);
-        }
-        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
-        float best_score = Float.POSITIVE_INFINITY;
-        for (char[][] move : moves) {
-            char[][] clone = copy(move);
-            float score = max_play(clone, depth - 1);
-            if (score < best_score) {
-                //best_move = move
-                best_score = score;
-            }
-        }
-        return best_score;
-    }
-
-    private float max_play(char[][] currentState, int depth) {
-        if (isFinal(currentState) || depth == 0) {
-            return evaluate(currentState);
-        }
-        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
-        float best_score = Float.NEGATIVE_INFINITY;
-        for (char[][] move : moves) {
-            char[][] clone = copy(move);
-            float score = min_play(clone, depth - 1);
-            if (score > best_score) {
-                //best_move = move
-                best_score = score;
-            }
-        }
-        return best_score;
-    }
-
-    private float evaluate(char[][] currentState) {
+    public float evaluate(char[][] currentState, char player) {
         float hashScore = stateIsFinal(currentState);
-        float pawnScore = scoreOfPawns(currentState, 'W') - scoreOfPawns(currentState, 'B');
-        float mobility = getAllPosibleMoves(currentState, 'W').size() - getAllPosibleMoves(currentState, 'B').size();
-        float movesNo = movesNo(currentState, 'B') - movesNo(currentState, 'W');
-        return pawnScore + 0.1f * mobility + movesNo + hashScore;
-        //- 0.5 * blockedPieces(currentState);
+        char oponent;
+        if( player == 'W'){
+            oponent = 'B';
+        } else {
+            oponent = 'W';
+        }
+        float captureScore = captureScore(currentState, player);
+        float pawnScore = scoreOfPawns(currentState, player) - scoreOfPawns(currentState, oponent);
+        float mobility = getAllPosibleMoves(currentState, player).size() - getAllPosibleMoves(currentState, oponent).size();
+        float movesNo = movesNo(currentState, oponent) - movesNo(currentState, player);
+        return pawnScore + 0.1f * mobility + 0.2f*movesNo + hashScore + captureScore;
+    }
+
+    private float captureScore(char[][] currentState, char player) {
+        List<Pawn> pawns = getPawnList(currentState, player);
+        for( Pawn pawn : pawns){
+            if (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() + 1)
+                    || (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1)) ){
+                return 10;
+            }
+        }
+        return 0;
     }
 
     private float stateIsFinal(char[][] currentState) {
@@ -519,18 +521,54 @@ public class Chessboard {
         return pawns;
     }
 
-    public char[][] minimax(char[][] currentState) {
-        List<char[][]> moves = getAllPosibleMoves(currentState, 'W');
+    public float min_play(char[][] currentState, int depth, char player) {
+        if (isFinal(currentState)|| depth == 0) {
+            return evaluate(currentState, player);
+        }
+        List<char[][]> moves = getAllPosibleMoves(currentState, player);
+        float best_score = Float.POSITIVE_INFINITY;
+        for (char[][] move : moves) {
+            char[][] clone = copy(move);
+            float score = max_play(clone, depth - 1, player);
+            if (score < best_score) {
+                //best_move = move
+                best_score = score;
+            }
+        }
+        return best_score;
+    }
+
+    private float max_play(char[][] currentState, int depth, char player) {
+        if (isFinal(currentState) || depth == 0) {
+            return evaluate(currentState, player);
+        }
+        List<char[][]> moves = getAllPosibleMoves(currentState, player);
+        float best_score = Float.NEGATIVE_INFINITY;
+        for (char[][] move : moves) {
+            char[][] clone = copy(move);
+            float score = min_play(clone, depth - 1, player);
+            if (score > best_score) {
+                //best_move = move
+                best_score = score;
+            }
+        }
+        return best_score;
+    }
+
+    public char[][] minimax(char[][] currentState, char player, int depth) {
+        List<char[][]> moves = getAllPosibleMoves(currentState, player);
         char[][] bestMove = moves.get(0);
         float best_score = Float.NEGATIVE_INFINITY;
         for (char[][] move : moves) {
             char[][] clone = copy(move);
-            float score = min_play(clone, 0);
+            float score = min_play(clone, depth, player);
             if (score > best_score) {
                 bestMove = copy(move);
                 best_score = score;
             }
         }
+        //System.out.println(best_score);
+        //System.out.println(toString(bestMove));
         return bestMove;
     }
 }
