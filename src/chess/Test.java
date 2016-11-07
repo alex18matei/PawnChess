@@ -99,14 +99,14 @@ public class Test {
 
         /*chessboard.setWasInitialMove(true);
         chessboard.setEnPassantI(2);
-        chessboard.setEnPassantJ(2);*/
-        //Pawn pawn = new Pawn(3,3);
-        //List<char[][]> posibleStates = chessboard.getAllPosibleMoves(currentState);
-        /*for( char[][] state : posibleStates){
+        chessboard.setEnPassantJ(2);
+        Pawn pawn = new Pawn(3,3);
+        List<char[][]> posibleStates = chessboard.getAllPosibleMoves(currentState);
+        for( char[][] state : posibleStates){
             System.out.println(chessboard.toString(state));
         }*/
-        chessboard.setComputerTurn(true);
+/*        chessboard.setComputerTurn(true);
         char[][] bestState = chessboard.minimax(currentState, 'B', 2);
-        System.out.println("Best : " + chessboard.evaluate(currentState, 'B') + "\n" + chessboard.toString(bestState));
+        System.out.println("Best : " + chessboard.evaluate(currentState, 'B') + "\n" + chessboard.toString(bestState));*/
     }
 }

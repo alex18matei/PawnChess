@@ -112,6 +112,17 @@ public class Chessboard {
                 return true;
             }
         }
+        int nrW = 0, nrB = 0;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (state[i][j] == 'W')
+                    nrW++;
+                if (state[i][j] == 'B')
+                    nrB++;
+            }
+        }
+        if (nrB == 0 || nrW == 0)
+            return true;
         return false;
     }
 
@@ -320,10 +331,15 @@ public class Chessboard {
         char[][] initialState = init();
         System.out.println(this.toString(initialState));
         char[][] currentState = copy(initialState);// = getPlayerMove(initialState);
-
+        char player = 'W';
         while (!isFinal(initialState)) {
+            if(getAllPosibleMoves(initialState, player).size() == 0) {
+                System.out.println("Remiza ");
+                break;
+            }
             if (!isComputerTurn) {
                 System.out.println("Player 1 (White)");
+                player = 'B';
                 do {
                     currentState = getPlayerMove(initialState);
                     if (currentState == initialState) {
@@ -331,6 +347,7 @@ public class Chessboard {
                     }
                 } while (currentState == initialState);
             } else {
+                player = 'W';
                 System.out.println("Computer (Black)");
                 currentState = minimax(initialState, 'B', 0);
             }
@@ -453,23 +470,23 @@ public class Chessboard {
     public float evaluate(char[][] currentState, char player) {
         float hashScore = stateIsFinal(currentState);
         char oponent;
-        if( player == 'W'){
+        if (player == 'W') {
             oponent = 'B';
         } else {
             oponent = 'W';
         }
-        float captureScore = captureScore(currentState, oponent) -  captureScore(currentState, player);
+        float captureScore = captureScore(currentState, oponent) - captureScore(currentState, player);
         float pawnScore = scoreOfPawns(currentState, player) - scoreOfPawns(currentState, oponent);
         float mobility = getAllPosibleMoves(currentState, player).size() - getAllPosibleMoves(currentState, oponent).size();
         float movesNo = movesNo(currentState, oponent) - movesNo(currentState, player);
-        return pawnScore + 0.1f * mobility - 0.2f*movesNo + hashScore + captureScore;
+        return pawnScore + 0.1f * mobility - 0.2f * movesNo + hashScore + captureScore;
     }
 
     private float captureScore(char[][] currentState, char player) {
         List<Pawn> pawns = getPawnList(currentState, player);
-        for( Pawn pawn : pawns){
+        for (Pawn pawn : pawns) {
             if (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() + 1)
-                    || (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1)) ){
+                    || (validateCapture(currentState, pawn.getLine(), pawn.getCol(), pawn.getCol() - 1))) {
                 return 10;
             }
         }
@@ -477,7 +494,7 @@ public class Chessboard {
     }
 
     private float stateIsFinal(char[][] currentState) {
-        if( isFinal(currentState)){
+        if (isFinal(currentState)) {
             return Float.POSITIVE_INFINITY;
         }
         return 0;
@@ -492,12 +509,12 @@ public class Chessboard {
         return pawns.size();
     }
 
-    private float movesNo(char[][] currentState, char player){
+    private float movesNo(char[][] currentState, char player) {
         float score = 0;
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (currentState[i][j] == player) {
-                    if( player == 'W'){
+                    if (player == 'W') {
                         score += i;
                     } else {
                         score += (7 - i);
@@ -522,7 +539,7 @@ public class Chessboard {
     }
 
     public float min_play(char[][] currentState, int depth, char player) {
-        if (isFinal(currentState)|| depth == 0) {
+        if (isFinal(currentState) || depth == 0) {
             return evaluate(currentState, player);
         }
         List<char[][]> moves = getAllPosibleMoves(currentState, player);
